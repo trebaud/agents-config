@@ -74,7 +74,3 @@ This skill provides guidance for quality focused software development and archit
 - Avoid deep nesting (max 3 levels)
 - Keep functions focused and under 50 lines when possible
 - Keep files focused and under 200 lines of code when possible
-
-## Related Skills
-
-- **kiss-check**: Complements this skill with a complexity justification protocol. clean-architecture focuses on *how* to structure code properly; kiss-check focuses on *whether* complexity is warranted in the first place.

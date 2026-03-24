@@ -6,7 +6,7 @@ allowed-tools: Read, Grep, Glob, Bash, Write, Edit
 
 # Refactor
 
-Simplify code while maintaining functionality and test coverage. Use the `kiss-check` skill's complexity justification framework to evaluate whether existing patterns are warranted before refactoring.
+Simplify code while maintaining functionality and test coverage. Before refactoring, evaluate whether existing patterns are warranted by checking if the complexity serves a genuine purpose (reused 3+ times, concrete bug risk, measurable performance need, or consistency with established codebase patterns).
 
 ## When to Use
 

@@ -22,10 +22,6 @@ Generate unit and integration tests for recently modified or added code by analy
 - "add test coverage"
 - "test this file"
 
-### Integration with Other Skills
-- **create-pr**: After PR creation, check if changed files have tests
-- **code-reviewer**: During review, identify missing test coverage
-
 ## Workflow
 
 1. **Identify changed files** - Use git diff to find modified/added source files

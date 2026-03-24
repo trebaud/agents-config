@@ -169,11 +169,6 @@ async function processStripePayment(amount: number): Promise<void> {
 class PayPalProcessor implements PaymentProcessor { ... }
 ```
 
-## Related Skills
-
-- **clean-architecture**: Complements this skill with Clean Architecture principles, naming conventions, and library-first approach. kiss-check focuses on *when* complexity is warranted; clean-architecture focuses on *how* to structure it properly.
-- **refactor**: Use when kiss-check identifies existing overengineered code that should be simplified.
-
 ## Remember
 
 - Three similar lines of code > one premature abstraction

@@ -1,7 +1,7 @@
 ---
 name: code-reviewer
 description: Comprehensive code review combining quality, security, and maintainability checks. Use when reviewing code before a pull request, after completing a feature, after fixing bugs, or when the user asks for a code review.
-allowed-tools: Read, Grep, Glob, Bash, Skill
+allowed-tools: Read, Grep, Glob, Bash
 ---
 
 # Code Reviewer
@@ -26,7 +26,12 @@ Invoke this skill:
 
 ### Step 2: Security Analysis
 
-**CRITICAL**: Use the Skill tool to invoke the `security-analysis` skill to check for vulnerabilities.
+**CRITICAL**: Check for security vulnerabilities in the changed code:
+- Injection flaws (SQL, NoSQL, command, LDAP)
+- Authentication/authorization issues
+- Sensitive data exposure
+- Security misconfigurations
+- Known vulnerable dependencies
 
 ### Step 3: Code Quality Review
 
@@ -82,7 +87,7 @@ If new dependencies were added:
 - `path/to/file2.ts`
 
 ### Security Findings
-[Output from security-analysis skill]
+[Security vulnerabilities and concerns found during review]
 
 ### Quality Issues
 
