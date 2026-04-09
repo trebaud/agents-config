@@ -1,12 +1,12 @@
 ---
-name: clean-architecture
-description: Guide for quality-focused software architecture using Clean Architecture principles. Use when writing code, designing architecture, or analyzing code to ensure business-focused design and proper separation of concerns.
+name: clean-code
+description: Guide for quality-focused software development using Clean Code principles. Use when writing code, designing code, or analyzing code to ensure business-focused design and proper separation of concerns.
 user-invocable: false
 ---
 
-# Software Architecture Development Skill
+# Clean Code Development Skill
 
-This skill provides guidance for quality focused software development and architecture. It is based on Clean Architecture and business-focused design principles.
+This skill provides guidance for quality focused software development and code quality. It is based on Clean Code and business-focused design principles.
 
 ## Code Style Rules
 
@@ -33,9 +33,9 @@ This skill provides guidance for quality focused software development and archit
   - Security-sensitive code requiring full control
   - When existing solutions don't meet requirements after thorough evaluation
 
-#### Architecture and Design
+#### Code Design
 
-- **Clean Architecture & Business-Focused Principles:**
+- **Clean Code & Business-Focused Principles:**
   - Follow business-focused design and consistent terminology
   - Separate business models from technical concerns
   - Keep business logic independent of frameworks
@@ -57,7 +57,7 @@ This skill provides guidance for quality focused software development and archit
   - Don't build custom auth when Auth0/Supabase exists
   - Don't write custom state management instead of using Redux/Zustand
   - Don't create custom form validation instead of using established libraries
-- **Poor Architectural Choices:**
+- **Poor Code Choices:**
   - Mixing business logic with UI components
   - Database queries directly in controllers
   - Lack of clear separation of concerns
