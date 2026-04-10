@@ -23,7 +23,6 @@ ln -s ~/.agents/skills ~/.opencode/skills
 | [code-reviewer](skills/code-reviewer/SKILL.md) | Comprehensive code review covering quality, security, and maintainability. |
 | [create-pr](skills/create-pr/SKILL.md) | Creates pull requests with auto-generated title and description. |
 | [debug](skills/debug/SKILL.md) | Test-first debugging. Creates reproducing tests, then uses subagents to implement fixes. |
-| [extract-skill](skills/extract-skill/SKILL.md) | Extracts knowledge from web pages or files to create reusable skills. |
 | [interview](skills/interview/SKILL.md) | Asks non-obvious technical questions about implementation plans, tradeoffs, and constraints. |
 | [janitor](skills/janitor/SKILL.md) | Refactors code toward Clean Architecture and Clean Code principles. Fixes dependency violations, separates concerns, improves code quality. |
 | [kiss-check](skills/kiss-check/SKILL.md) | Forces justification for complex solutions. Must explain why simpler won't work. |
