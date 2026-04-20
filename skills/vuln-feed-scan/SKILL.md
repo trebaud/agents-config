@@ -51,9 +51,17 @@ For aggregator pages (HN, Bleeping, Krebs), the prompt should request only items
 
 ### 3. Build candidate list
 
-Drop anything older than the cutoff window × 3 (default: 3 days; hard cap at 14 days regardless of user-expanded window). Deduplicate across sources (same CVE or same incident).
+**3a. Age gate.** Drop anything older than the cutoff window × 1.5 (default window 3 days → hard drop at 5 days). Exception: items labeled actively exploited, CISA KEV, OR supply-chain may extend to 10 days. Nothing older than 10 days survives, ever. Deduplicate across sources (same CVE or same incident).
 
-For each surviving item, compute a score.
+**3b. Stack pre-filter (hard drop, not scoring).** An item must satisfy at least one of the following before it is scored. If none match, drop it — do not carry it into scoring on "interesting" grounds:
+
+- Directly affects a stack item: Node.js runtime, TypeScript compiler, MongoDB (server or official drivers), npm registry itself, a popular npm package (≥100k weekly downloads OR known transitive dep of Express/Fastify/Next.js/NestJS/Mongoose/Prisma), any AWS service, a crypto/web3 library or wallet/custody/exchange system we could plausibly touch.
+- Affects adjacent infra we actually run: TLS libs (OpenSSL, BoringSSL, rustls), HTTP parsers used by Node, container runtimes (Docker/containerd), GitHub Actions or the hosting provider (Vercel, Netlify, Cloudflare) for a Node/TS app, widely-used Node framework or auth lib listed above.
+- Supply-chain incident affecting any developer tool we plausibly use: npm/GitHub/CI provider breach, maintainer account takeover of a popular package, malicious version published to a registry, leaked CI/provider tokens.
+
+Items that affect only Windows desktops, Java/JVM-only stacks (ActiveMQ, Tomcat, Log4j-adjacent), PHP/WordPress, Microsoft Office, ICS/OT, or niche npm packages (<100k weekly downloads and no popular parent) are **out of scope** — drop them even if they look spicy.
+
+**3c. Score survivors.**
 
 **Severity / impact:**
 
@@ -61,14 +69,26 @@ For each surviving item, compute a score.
 |---|---|
 | Published ≤ 24h ago | +4 |
 | Published ≤ 48h ago | +2 |
-| Published 2–3d ago | −1 |
-| Published 4–14d ago | −3 (only surfaces if actively exploited or CISA KEV) |
+| Published 2–3d ago | −2 |
+| Published 4–7d ago | −4 (only via the KEV/exploited/supply-chain age exception) |
+| Published 8–10d ago | −6 (KEV/exploited/supply-chain only; must be genuinely active) |
 | Labeled zero-day / actively exploited / in CISA KEV | +5 |
-| Directly affects a stack item above | +4 |
-| Affects adjacent infra (TLS, HTTP parser, CI, widely-used Node lib) | +2 |
-| Pre-auth RCE / supply-chain / credential theft | +3 |
+| Directly affects a stack item | +4 |
+| Affects adjacent infra we run | +2 |
+| Pre-auth RCE | +3 |
+| Credential theft / secret exposure affecting our stack | +3 |
 | Requires unusual local access or social engineering only | −3 |
 | No CVE, no vendor advisory, no PoC | −2 |
+
+**Supply-chain signals** (apply on top of the severity table; one compromised dep poisons every repo that pulls it, so weight these heavily):
+
+| Signal | Weight |
+|---|---|
+| Popular npm package compromised: malicious version published, or maintainer account takeover | +6 |
+| npm registry itself, GitHub Actions, or a major CI/CD provider breached | +5 |
+| Hosting/deploy provider we could use breached with dev tokens leaked (Vercel, Netlify, Cloudflare, AWS-adjacent) | +5 |
+| Typosquat / dependency-confusion campaign targeting npm with confirmed downloads | +3 |
+| Build-tool or lockfile-manipulation vulnerability (npm, pnpm, yarn, bun) | +3 |
 
 **Source signal** (apply by source tier, not raw count; multiple mentions of the same underlying article do not stack):
 
@@ -81,7 +101,7 @@ For each surviving item, compute a score.
 | Appears on HN front page (top ~10) | +2 |
 | Appears on HN page 1 below top 10, or later pages | +1 |
 
-Keep items with score ≥ 5 before step 4. Cap at top 10 candidates. If nothing scores ≥ 5, say so and stop. Do not pad.
+Keep items with score ≥ 7 before step 4. Cap at top 8 candidates. If nothing scores ≥ 7, say so and stop. Do not pad. Supply-chain items that clear the bar must be ranked above same-score non-supply-chain items in the final report.
 
 ### 4. Corroborate with a generic search
 
@@ -95,7 +115,7 @@ Adjust score based on what the search returns. Do not drop items for lack of cor
 | Second outlet or public PoC repo found | +2 |
 | Nothing found | −2 |
 
-Re-apply the score ≥ 5 cutoff after this adjustment. A single primary-source item (e.g. a fresh KEV entry) still clears the bar on its own; a single secondary-source story with no corroboration usually will not.
+Re-apply the score ≥ 7 cutoff after this adjustment. A single primary-source item (e.g. a fresh KEV entry) still clears the bar on its own; a single secondary-source story with no corroboration usually will not.
 
 ### 5. Report
 
