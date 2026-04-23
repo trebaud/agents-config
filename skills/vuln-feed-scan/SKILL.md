@@ -51,7 +51,7 @@ For aggregator pages (HN, Bleeping, Krebs), the prompt should request only items
 
 ### 3. Build candidate list
 
-**3a. Age gate.** Drop anything older than the cutoff window × 1.5 (default window 3 days → hard drop at 5 days). Exception: items labeled actively exploited, CISA KEV, OR supply-chain may extend to 10 days. Nothing older than 10 days survives, ever. Deduplicate across sources (same CVE or same incident).
+**3a. Age gate.** Drop anything older than the cutoff window × 1.5 (default window 3 days → hard drop at 5 days). Exception: items labeled actively exploited, CISA KEV, or supply-chain may extend to 10 days. Anything older than 10 days is always dropped. Deduplicate across sources (same CVE or same incident).
 
 **3b. Stack pre-filter (hard drop, not scoring).** An item must satisfy at least one of the following before it is scored. If none match, drop it — do not carry it into scoring on "interesting" grounds:
 
@@ -119,25 +119,54 @@ Re-apply the score ≥ 7 cutoff after this adjustment. A single primary-source i
 
 ### 5. Report
 
-Output a ranked markdown table, most urgent first. One row per finding:
+The report is the only thing the user reads. Format it for scanning, with plenty of whitespace between findings.
+
+**5a. Ranked table.** Most urgent first. One row per finding:
 
 ```
-| Severity | CVE / Name | Affects | Published | Action |
+| # | Severity | CVE / Name | Affects | Published | Action |
 ```
 
+- `#` is a 1-based index matching the detail blocks below, so the user can jump between them.
 - Severity: Critical / High only. Anything lower does not belong in the report.
 - Affects: the specific stack item it hits (e.g. "npm: express@<4.20.0", "AWS IAM", "MongoDB driver").
 - Action: concrete next step in ≤12 words (e.g. "Pin express ≥4.20.0 in backend/package.json", "Rotate AWS access keys issued before YYYY-MM-DD", "Audit `npm ls <pkg>` across repos").
 
-After the table, add a short block for each finding (same order as the table):
+**5b. Detail blocks.** After the table, one block per finding in the same order. Separate blocks with a horizontal rule (`---`) so each finding is visually distinct. Use this structure, keeping each bullet on its own line:
 
 ```
-**CVE / Name** — One or two sentences: what the vulnerability is, why it matters to our stack, and what the attacker can do if it's exploited. No padding.
+### {index}. {CVE / Name} — {Severity}
+
+- **Affects:** {specific stack item(s)}
+- **Published:** {date, or `date?`}
+- **Source:** [{primary source name}]({url}) · [{secondary, if any}]({url})
+
+**What it is.** One sentence describing the vulnerability in plain terms.
+
+**Why it matters to us.** One sentence tying it to our stack — which service, which dep, which blast radius.
+
+**Attacker capability.** One sentence on what exploitation gets them (RCE, data exfil, token theft, etc.).
+
+**Action.** The same concrete next step from the table, expanded to one sentence if useful.
 ```
 
-Follow that with a single "Suggested next commands" section listing exact commands the user can run (e.g. `npm audit`, `npm ls <pkg>`, `grep -r <indicator>`). No prose padding.
+Rules for the detail blocks:
 
-If the report is empty, say exactly: `No high-signal threats in window. Next scan recommended in 12h.`
+- Never merge the four labeled paragraphs into one run-on line. Each gets its own line with a blank line before and after.
+- No padding sentences, no "it is important to note that", no best-practice lectures. If a section would be empty or obvious, drop it.
+- Every CVE/incident name in both the table and the detail heading is a markdown hyperlink to its primary source.
+
+**5c. Suggested next commands.** A single fenced `bash` block listing exact commands the user can run (e.g. `npm audit`, `npm ls <pkg>`, `grep -r <indicator>`). One command per line, with a `# {finding index}: {short intent}` comment above each so the user knows which finding it maps to.
+
+**5d. Also worth a glance.** A final section titled `## Also worth a glance` listing items that did not clear the score ≥ 7 bar but could still be interesting: tangential to our stack, partially corroborated, or a slow-burn supply-chain story that may matter later. One line per item, up to 8 items total:
+
+```
+- [{CVE / Name}]({url}) — {≤15 words on what it is and why it's borderline} _(score {n}, {reason it was down-ranked})_
+```
+
+Pull candidates from items dropped in step 3c / 4 for score reasons only. Do not include items hard-dropped by the 3b stack pre-filter (Windows-only, PHP/WordPress, ICS, etc.); those are noise. If nothing qualifies, omit the section entirely; do not emit an empty header.
+
+**5e. Empty report.** If nothing survives step 4 and nothing qualifies for 5d, say exactly: `No high-signal threats in window. Next scan recommended in 12h.` with no table or detail blocks. If the main report is empty but 5d has items, keep 5d and prepend a single line: `No items cleared the high-signal bar, but these may be worth a glance:`.
 
 ### 6. Save report file
 
